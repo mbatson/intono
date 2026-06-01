@@ -1,0 +1,77 @@
+#+title: Intono - In(line) to(do) no(tes) for writing
+#+author: Matthew Batson
+#+language: en
+
+Intono provides helper functions and (optionally) font-lock highlighting for inline todo notes useful in the writing and drafting of prose and poetry.
+
+An inline todo note for Intono's purposes is a markup construct beginning with the text, =((TODO:=, and ending with =))=. Between these two elements the user can insert any text they want. This package provides functions to make the insertion and deletion of such notes in a buffer easy and convenient. It also provides a minor mode, ~intono-mode~, which highlights inline todo notes with font-lock so that they are visually distinct from the surrounding text.
+
+Inline todo notes do not need to be surrounded by whitespace, and in fact it is better if they are not. Here is an example of how inline todo notes might be used:
+
+#+begin_quote
+Shall I compare thee((TODO: modernise to “you”?)) to a summer’s day?((TODO: too clichéd, revise))
+#+end_quote
+
+Note the absence of any additional whitespace between the inline todo note and the rest of the text. Using inline todo notes in this manner means that if they are stripped from a file (for example, with ~intono-delete-all-in-buffer~), their removal will not leave redundant whitespace behind.
+
+The point of this style of todo note is to enable the user to record notes or reminders relating to the immediate context of what they are writing, without breaking the writing flow to open another document, and in a form so that the notes remain embedded within draft document and their original context, instead of recorded elsewhere in a place where they may be forgotten or lost.
+
+How one works while writing is, however, highly personal. This package was developed for my own, particular way of working. This makes it rather niche. If you do find it useful though, or think it would be if only it was tweaked in this or that minor way, suggestions, contributions, and/or forks are of course always welcome.
+
+* Installation
+
+1. Download this repo to a directory of your choosing
+2. In your =init.el= insert:
+   #+begin_src emacs-lisp
+     (add-to-list 'load-path "/PATH/TO/REPO")
+     (require 'intono)
+   #+end_src
+
+# TODO: Give installation instructions for package-vc installation.
+
+* Getting Started
+
+** Inserting inline todo notes
+
+The core of intono is the command ~intono-insert~. This command inserts the markup for an inline todo note at point, and then places point inside the markup so you can immediately begin typing (this way, if you are anything like me, you can get it down before you forget what it was you needed to make a note about).
+
+It is highly recommended to bind ~intono-insert~ to a key for ease of use. For example, to bind it to =C-c i= in all major modes, put something like this in your =init.el=:
+
+#+begin_src emacs-lisp
+  (keymap-global-set "C-c i" 'intono-insert)
+#+end_src
+
+Or to bind it only when in ~text-mode~ and all derived modes (which includes ~org-mode~ and ~markdown-mode~):
+
+#+begin_src emacs-lisp
+  (add-hook 'text-mode-hook
+            (lambda ()
+             (keymap-set text-mode-map "C-c i" 'intono-insert)))
+#+end_src
+
+See [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Init-Rebinding.html][Rebinding Keys in Your Init File]] in the GNU Emacs Manual for more info.
+
+** Font highlighting of inline todo notes
+
+The other main piece of Intono is the minor mode, ~intono-mode~, which highlights inline todo notes with the face, ~font-lock-comment-face~.
+
+Intono mode can be enabled manually for a single Emacs session in a single buffer with ~M-x intono-mode~. Or it can be manually enabled globally for all ~text-mode~ (and modes derived from ~text-mode~) buffers with ~M-x global-intono-mode~ (see below for how to customise the modes that ~global-intono-mode~ applies to).
+
+If you want ~intono-mode~ to be automatically enabled in a particular mode put the following in your =init.el= file:
+
+#+begin_src emacs-lisp
+  ;; Enable intono-mode automatically in text-mode buffers (including modes derived from text-mode).
+  (add-hook 'text-mode-hook 'intono-mode)
+#+end_src
+
+Alternatively, enable ~global-intono-mode~ and (if needed) customise the setting ~global-intono-modes~:
+
+#+begin_src emacs-lisp
+  (global-intono-mode 1)
+  ;; Optionally, customise the modes that global-intono-mode will enable intono-mode for.
+  (customize-set-variable 'global-intono-modes '(org-mode markdown-mode))
+#+end_src
+
+~global-intono-modes~ is set to ~text-mode~ by default.
+
+* TODO COMMENT Configuration
