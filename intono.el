@@ -71,12 +71,12 @@
 ;; TODO: Make keyword customisable?
 ;; TODO: Make delimiters customisable?
 
-;; TODO: Add :link to repo and info file (if info file created)
 (defgroup intono nil
   "In(line) to(do) no(tes)."
   :group 'text
   :prefix "intono-"
-  :version "30.2")
+  :version "30.2"
+  :link '(url-link :tag "Website" "https://github.com/mbatson/intono"))
 
 (defvar intono--regexp "((TODO:.*?))")
 
