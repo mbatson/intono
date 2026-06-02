@@ -70,6 +70,8 @@
 
 ;; TODO: Make keyword customisable?
 ;; TODO: Make delimiters customisable?
+;; TODO: Create command for hiding and showing notes (completely hide
+;; or reduce to a marker symbol?)
 
 (defgroup intono nil
   "In(line) to(do) no(tes)."
