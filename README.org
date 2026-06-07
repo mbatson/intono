@@ -78,7 +78,7 @@ Alternatively, enable ~global-intono-mode~ and (if needed) customise the setting
 
 ** Customising the syntax of inline todo notes
 
-While inline todo notes were introduced as having two elements (=((TODO:​ = and =))=), there are really three elements that make up the syntax of inline todo notes: the starting delimiter, an optional keyword, and the ending delimiter. The content of the note goes between the keyword (or the starting delimiter if there is no keyword set) and the ending delimiter. All three elements can be customised by the user.
+While inline todo notes were introduced as having two elements (=((TODO: ​= and =))=), there are really three elements that make up the syntax of inline todo notes: the starting delimiter, an optional keyword, and the ending delimiter. The content of the note goes between the keyword (or the starting delimiter if there is no keyword set) and the ending delimiter. All three elements can be customised by the user.
 
 If you only want to customise the syntax of inline todo notes for a specific file, or the files in a specific directory, see [[https://www.gnu.org/software/emacs/manual/html_node/emacs/File-Variables.html][File Variables]] and [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Directory-Variables.html][Directory Variables]] in the GNU Emacs Manual.
 
