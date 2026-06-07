@@ -69,7 +69,7 @@ Alternatively, enable ~global-intono-mode~ and (if needed) customise the setting
 #+begin_src emacs-lisp
   (global-intono-mode 1)
   ;; Optionally, customise the modes that global-intono-mode will enable intono-mode for.
-  (customize-set-variable 'global-intono-modes '(org-mode markdown-mode))
+  (setopt global-intono-modes '(org-mode markdown-mode))
 #+end_src
 
 ~global-intono-modes~ is set to ~text-mode~ by default.
