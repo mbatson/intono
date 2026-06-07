@@ -14,7 +14,7 @@ Shall I compare thee((TODO: modernise to “you”?)) to a summer’s day?((TODO
 
 Note the absence of any additional whitespace between the inline todo note and the rest of the text. Using inline todo notes in this manner means that if they are stripped from a file (for example, with ~intono-delete-all-in-buffer~), their removal will not leave redundant whitespace behind.
 
-The point of this style of todo note is to enable the user to record notes or reminders relating to the immediate context of what they are writing, without breaking the writing flow to open another document, and in a form so that the notes remain embedded within draft document and their original context, instead of recorded elsewhere in a place where they may be forgotten or lost.
+The point of this style of todo note is to enable the user to record notes or reminders relating to the immediate context of what they are writing, without breaking the writing flow to open another document. It has the bonus of recording notes so that they are embedded within the draft document, and in their original context, instead of recorded elsewhere in a place where they can be forgotten and that must be manually kept in sync with the actual draft.
 
 How one works while writing is, however, highly personal. This package was developed for my own, particular way of working. This makes it rather niche. If you do find it useful though, or think it would be if only it was tweaked in this or that minor way, suggestions, contributions, and/or forks are of course always welcome.
 
@@ -78,17 +78,23 @@ Alternatively, enable ~global-intono-mode~ and (if needed) customise the setting
 
 ** Customising the syntax of inline todo notes
 
-While inline todo notes were introduced as having two elements (=((TODO: ​= and =))=), there are really three elements that make up the syntax of inline todo notes: the starting delimiter, an optional keyword, and the ending delimiter. The content of the note goes between the keyword (or the starting delimiter if there is no keyword set) and the ending delimiter. All three elements can be customised by the user.
+While inline todo notes were introduced as having two elements (=((TODO: ​= and =))=), there are really three elements that make up the syntax of inline todo notes:
+
+- The starting delimiter
+- An optional keyword
+- The ending delimiter.
+
+The content of the note goes between the keyword (or the starting delimiter if there is no keyword set) and the ending delimiter. All three elements can be customised by the user.
 
 If you only want to customise the syntax of inline todo notes for a specific file, or the files in a specific directory, see [[https://www.gnu.org/software/emacs/manual/html_node/emacs/File-Variables.html][File Variables]] and [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Directory-Variables.html][Directory Variables]] in the GNU Emacs Manual.
 
-(Note: I strongly advise when customising the syntax of inline todo notes that you keep their syntax unique enough that a regular expression search for them will never match something else in your document as well. Otherwise, commands like ~intono-delete-all-in-buffer~ might delete content in your document it was not supposed to.)
+(Note: I strongly advise when customising inline todo notes that you keep their syntax unique enough that a regular expression search for them will never match something else in your document as well. Otherwise, commands like ~intono-delete-all-in-buffer~ might delete content in your document it was not supposed to.)
 
 *** Starting delimiter (~intono-delimiter-start~)
 
 Default value: =((=
 
-Customise it to any string of characters you wish with ~setopt~. For example to change it to a single square bracket, put the following in your =init.el=:
+Customise it to any string of characters you wish with ~setopt~. For example, to change it to a single square bracket put the following in your =init.el=:
 
 #+begin_src emacs-lisp
   (setopt intono-delimiter-start "[")
@@ -110,7 +116,7 @@ Default value: =TODO: ​=
 
 Customise it to any string of characters with ~setopt~.
 
-A small tip: if you always want a space between the keyword and the content of the note, include a trailing space in the value of ~intono-keyword~ (this is what the default value does.
+A small tip: if you always want a space between the keyword and the content of the note, include a trailing space in the value of ~intono-keyword~ (this is what the default value does).
 
 If you do not want a keyword at all (i.e., you only want delimiter symbols as syntax), then set ~intono-keyword~ to the empty string, like so:
 
