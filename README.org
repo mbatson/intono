@@ -4,7 +4,7 @@
 
 Intono provides helper functions and (optionally) font-lock highlighting for inline todo notes useful in the writing and drafting of prose and poetry.
 
-An inline todo note for Intono's purposes is a markup construct beginning with the text, =((TODO:=, and ending with =))=. Between these two elements the user can insert any text they want. This package provides functions to make the insertion and deletion of such notes in a buffer easy and convenient. It also provides a minor mode, ~intono-mode~, which highlights inline todo notes with font-lock so that they are visually distinct from the surrounding text.
+An inline todo note for Intono's purposes is a markup construct that by default begins with the text, =((TODO: ​=, and ends with =))=. Between these two elements the user can insert any text they want. This package provides functions to make the insertion and deletion of such notes in a buffer easy and convenient. It also provides a minor mode, ~intono-mode~, which highlights inline todo notes with font-lock so that they are visually distinct from the surrounding text.
 
 Inline todo notes do not need to be surrounded by whitespace, and in fact it is better if they are not. Here is an example of how inline todo notes might be used:
 
@@ -74,4 +74,44 @@ Alternatively, enable ~global-intono-mode~ and (if needed) customise the setting
 
 ~global-intono-modes~ is set to ~text-mode~ by default.
 
-* TODO COMMENT Configuration
+* Configuration
+
+** Customising the syntax of inline todo notes
+
+While inline todo notes were introduced as having two elements (=((TODO:​ = and =))=), there are really three elements that make up the syntax of inline todo notes: the starting delimiter, an optional keyword, and the ending delimiter. The content of the note goes between the keyword (or the starting delimiter if there is no keyword set) and the ending delimiter. All three elements can be customised by the user.
+
+If you only want to customise the syntax of inline todo notes for a specific file, or the files in a specific directory, see [[https://www.gnu.org/software/emacs/manual/html_node/emacs/File-Variables.html][File Variables]] and [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Directory-Variables.html][Directory Variables]] in the GNU Emacs Manual.
+
+*** Starting delimiter (~intono-delimiter-start~)
+
+Default value: =((=
+
+Customise it to any string of characters you wish with ~setopt~. For example to change it to a single square bracket, put the following in your =init.el=:
+
+#+begin_src emacs-lisp
+  (setopt intono-delimiter-start "[")
+#+end_src
+
+*** Ending delimiter (~intono-delimiter-end~)
+
+Default value: =))=
+
+Customise it just like above. For example:
+
+#+begin_src emacs-lisp
+  (setopt intono-delimiter-end "]")
+#+end_src
+
+*** Keyword (~intono-keyword~)
+
+Default value: =TODO: ​=
+
+Customise it to any string of characters with ~setopt~.
+
+A small tip: if you always want a space between the keyword and the content of the note, include a trailing space in the value of ~intono-keyword~ (this is what the default value does.
+
+If you do not want a keyword at all (i.e., you only want delimiter symbols as syntax), then set ~intono-keyword~ to the empty string, like so:
+
+#+begin_src emacs-lisp
+  (setopt intono-keyword "")
+#+end_src
