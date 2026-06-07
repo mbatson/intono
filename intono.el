@@ -4,7 +4,7 @@
 
 ;; Author: Matthew Batson <mbatson@mbatson.net>
 ;; Created: 2026
-;; Version: 0.1
+;; Version: 0.2
 ;; Package-Requires: ((emacs "25.1"))
 ;; Keywords: text
 
@@ -31,13 +31,13 @@
 ;; drafting of prose and poetry.
 ;;
 ;; An inline todo note for Intono's purposes is a markup construct
-;; beginning with the text, `((TODO:', and ending with `))'. Between
-;; these two elements the user can insert any text they want. This
-;; package provides functions to make the insertion and deletion of
-;; such notes in a buffer easy and convenient. It also provides a
-;; minor mode, `intono-mode', which highlights inline todo notes with
-;; font-lock so that they are visually distinct from the surrounding
-;; text.
+;; that by default begins with the text, `((TODO: ', and ends with
+;; `))'. Between these two elements the user can insert any text they
+;; want. This package provides functions to make the insertion and
+;; deletion of such notes in a buffer easy and convenient. It also
+;; provides a minor mode, `intono-mode', which highlights inline todo
+;; notes with font-lock so that they are visually distinct from the
+;; surrounding text.
 ;;
 ;; Inline todo notes do not need to be surrounded by whitespace, and
 ;; in fact it is better if they are not. Here is an example of how
@@ -68,8 +68,6 @@
 
 ;;; Code:
 
-;; TODO: Make keyword customisable?
-;; TODO: Make delimiters customisable?
 ;; TODO: Create command for hiding and showing notes (completely hide
 ;; or reduce to a marker symbol?)
 
@@ -80,15 +78,49 @@
   :version "30.2"
   :link '(url-link :tag "Website" "https://github.com/mbatson/intono"))
 
-(defvar intono--regexp "((TODO:.*?))")
+(defcustom intono-delimiter-start "(("
+  "String that denotes the beginning of an inline todo note."
+  :type 'string
+  :group 'intono
+  :package-version '(intono . "0.2"))
 
-;; TODO: Add user option for auto-inserting a space after keyword
+(defcustom intono-delimiter-end "))"
+  "String that denotes the ending of an inline todo note."
+  :type 'string
+  :group 'intono
+  :package-version '(intono . "0.2"))
+
+(defcustom intono-keyword "TODO: "
+  "String that denotes the keyword of an inline todo note.
+
+The keyword comes immediately following the starting delimiter (see
+`intono-delimiter-start'), acting as an additional element to ensure
+inline todo notes are syntactically unique within any document, and/or
+as an indication of the notes purpose, like the default `TODO: '
+keyword.
+
+If you do not want to use a keyword at all (i.e., use only delimiter
+symbols to syntactically mark inline todo notes), set this variable to
+the empty string: `\"\"'."
+  :type 'string
+  :group 'intono
+  :package-version '(intono . "0.2"))
+
+(defun intono--regexp ()
+  "Return a regular expression that matches any inline todo note."
+  (concat (regexp-quote intono-delimiter-start)
+          (regexp-quote intono-keyword)
+          ".*?"
+          (regexp-quote intono-delimiter-end)))
+
 ;;;###autoload
 (defun intono-insert ()
   "Insert an inline todo note at point."
   (interactive)
-  (insert "((TODO: ))")
-  (backward-char 2))
+  (insert intono-delimiter-start
+          intono-keyword
+          intono-delimiter-end)
+  (backward-char (length intono-delimiter-end)))
 
 ;; TODO: Enable confirmation of deleting each inline todo note like
 ;; `query-replace'?
@@ -101,17 +133,18 @@ for publication.
 
 WARNING: This function is destructive to the buffer, removing all inline
 todo notes in the buffer by regexp matching on `intono--regexp'. While
-the syntax of inline todo notes are designed to be unique enough that
-they can hopefully be matched without ever accidentally matching text
-that is not an inline todo note, that cannot be guaranteed. Therefore,
-the user should proceed with caution when using this function, and
-always ensure they have a backup of the text in the buffer before
-running it."
+the default syntax of inline todo notes are designed to be unique enough
+that they can hopefully be matched without ever accidentally matching
+text that is not an inline todo note, that cannot be guaranteed.
+Therefore, the user should proceed with caution when using this
+function, and always ensure they have a backup of the text in the buffer
+before running it."
   (interactive)
-  (let ((case-fold-search nil))
+  (let ((case-fold-search nil)
+        (inline-todo-note (intono--regexp)))
     (save-excursion
       (goto-char (point-min))
-      (while (re-search-forward intono--regexp nil t)
+      (while (re-search-forward inline-todo-note nil t)
         (delete-region (match-beginning 0) (match-end 0))))))
 
 ;;;###autoload
@@ -137,9 +170,9 @@ inline todo notes, and is not necessary for Intono functions like
   (require 'font-lock)
   (if intono-mode
       (progn
-        (font-lock-add-keywords nil `((,intono--regexp 0 font-lock-comment-face)))
+        (font-lock-add-keywords nil `((,(intono--regexp) 0 font-lock-comment-face)))
         (font-lock-flush))
-    (font-lock-remove-keywords nil `((,intono--regexp 0 font-lock-comment-face)))
+    (font-lock-remove-keywords nil `((,(intono--regexp) 0 font-lock-comment-face)))
     (font-lock-flush)))
 
 ;;;###autoload
