@@ -5,7 +5,7 @@
 ;; Author: Matthew Batson <mbatson@mbatson.net>
 ;; Created: 2026
 ;; Version: 0.2
-;; Package-Requires: ((emacs "25.1"))
+;; Package-Requires: ((emacs "29.1"))
 ;; Keywords: text
 
 ;; This file is not part of GNU Emacs.
@@ -135,11 +135,33 @@ If an overlay already exists, move its position, otherwise create it."
     (setq intono--overlay (make-overlay beg end))
     (overlay-put intono--overlay 'face 'query-replace)))
 
-;; TODO: Create intono-delete-all-in-buffer-map with y, n, and ! for
-;; all (also @ for delete all and `diff-buffer-with-file'
-;; afterwards?).
-;; TODO: Use `read-from-minibuffer' with intono specific map instead
-;; of yes-or-no-p
+(defun intono--clean-up-overlay ()
+  (when intono--overlay
+    (delete-overlay intono--overlay)))
+
+(defun intono-delete-abort ()
+  (interactive)
+  (intono--clean-up-overlay)
+  (abort-minibuffers))
+
+(defvar intono-delete-all-in-buffer-map
+  (let ((map (make-sparse-keymap)))
+    (keymap-set map "C-g" #'intono-delete-abort)
+    (keymap-set map "y" #'y-or-n-p-insert-y)
+    (keymap-set map "Y" #'y-or-n-p-insert-y)
+    (keymap-set map "n" #'y-or-n-p-insert-n)
+    (keymap-set map "N" #'y-or-n-p-insert-n)
+    ;; TODO: Bind ! to delete all without confirmation.
+    ;; TODO: Bind @ to delete all and `diff-buffer-with-file'
+    ;; TODO: Bind all other keys to a modified version of `y-or-n-p-insert-other'
+    map))
+
+;; TODO: Just use `read-key' instead of `read-from-minibuffer'? (base off how `y-or-n-p' does it)
+;; TODO: OR use `read-char-choice' or `read-char-choice-with-read-key'?
+;; TODO: OR use `map-y-or-n-p'? (TRY THIS: SEEMS TO BE BASICALLY EXACTLY WHAT I'M TRYING TO CREATE ANYWAY) See `save-some-buffers' for an example of usage.
+;; TODO: OR use `read-answer'?
+;; TODO: OR use `read-multiple-choice'?
+;; TODO: Refactor to intono-delete-all
 ;;;###autoload
 (defun intono-delete-all-in-buffer ()
   "Delete all inline todo notes in buffer.
@@ -164,14 +186,13 @@ before running it."
         (let ((beg (match-beginning 0))
               (end (match-end 0)))
           (intono--highlight beg end)
-          ;; FIXME: Overlay is never cleaned up if `yes-or-no-p' is
-          ;; quit with C-g. Look at how isearch/query-replace handles
-          ;; this.
-          (when (yes-or-no-p "Delete inline todo note at point? ")
-            (delete-region beg end))))
+          (let ((input (read-from-minibuffer "Delete inline todo note at point? (y or n, C-g to abort) "
+                                             nil
+                                             intono-delete-all-in-buffer-map)))
+            (when (string= input "y")
+                   (delete-region beg end)))))
       ;; Clean up overlay when finished.
-      (when intono--overlay
-        (delete-overlay intono--overlay)))))
+      (intono--clean-up-overlay))))
 
 ;;;###autoload
 (define-minor-mode intono-mode
