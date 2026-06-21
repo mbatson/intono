@@ -5,7 +5,7 @@
 ;; Author: Matthew Batson <mbatson@mbatson.net>
 ;; Created: 2026
 ;; Version: 0.2
-;; Package-Requires: ((emacs "25.1"))
+;; Package-Requires: ((emacs "29.1"))
 ;; Keywords: text
 
 ;; This file is not part of GNU Emacs.
@@ -106,6 +106,9 @@ the empty string: `\"\"'."
   :group 'intono
   :package-version '(intono . "0.2"))
 
+(defvar intono--overlay nil
+  "Overlay for highlighting inline todo notes during interactive deletion.")
+
 (defun intono--regexp ()
   "Return a regular expression that matches any inline todo note."
   (concat (regexp-quote intono-delimiter-start)
@@ -122,30 +125,60 @@ the empty string: `\"\"'."
           intono-delimiter-end)
   (backward-char (length intono-delimiter-end)))
 
-;; TODO: Enable confirmation of deleting each inline todo note like
-;; `query-replace'?
+;; `intono--highlight' modelled on `isearch-highlight' and
+;; `replace-highlight'.
+(defun intono--highlight (beg end)
+  "Highlight the region from BEG to END with an `intono--overlay'.
+If an overlay already exists, move its position, otherwise create it."
+  (if intono--overlay
+      (move-overlay intono--overlay beg end)
+    (setq intono--overlay (make-overlay beg end))
+    (overlay-put intono--overlay 'face 'query-replace)))
+
+(defun intono--clean-up-overlay ()
+  "Delete any existing `intono--overlay'."
+  (when intono--overlay
+    (delete-overlay intono--overlay)))
+
+;; TODO: Refactor to intono-delete-all
+;; TODO: Create variant that runs intono-delete-all and then shows a
+;; diff of changes made.
 ;;;###autoload
 (defun intono-delete-all-in-buffer ()
-  "Delete all inline todo notes in buffer.
+  "Interactively delete inline todo notes in current buffer.
 
 This is particularly useful for preparing text full of inline todo notes
 for publication.
 
-WARNING: This function is destructive to the buffer, removing all inline
-todo notes in the buffer by regexp matching on `intono--regexp'. While
-the default syntax of inline todo notes are designed to be unique enough
-that they can hopefully be matched without ever accidentally matching
-text that is not an inline todo note, that cannot be guaranteed.
-Therefore, the user should proceed with caution when using this
-function, and always ensure they have a backup of the text in the buffer
-before running it."
+This function is destructive, removing inline todo notes in the buffer
+by regexp matching on `intono--regexp'. While the default syntax of
+inline todo notes is intended to be unique enough that this function
+won't accidentally match any text that is not an inline todo note, the
+user should still proceed with caution, particularly when pressing ! to
+delete all remaining inline todo notes, and always ensure they have a
+backup of the text in the buffer before running it."
   (interactive)
   (let ((case-fold-search nil)
         (inline-todo-note (intono--regexp)))
     (save-excursion
       (goto-char (point-min))
-      (while (re-search-forward inline-todo-note nil t)
-        (delete-region (match-beginning 0) (match-end 0))))))
+      (condition-case nil
+          (map-y-or-n-p "Delete inline todo note before point? "
+                        (lambda (x)
+                          (delete-region (car x) (nth 1 x)))
+                        (lambda ()
+                          (if (re-search-forward inline-todo-note nil t)
+                              (let ((beg (match-beginning 0))
+                                    (end (match-end 0)))
+                                (intono--highlight beg end)
+                                (list beg end))
+                            nil))
+                        '("inline todo note" "inline todo notes" "delete")
+                        nil
+                        t)
+        ;; Clean up overlay if user quits, like with C-g.
+        (quit (intono--clean-up-overlay)))
+      (intono--clean-up-overlay))))
 
 ;;;###autoload
 (define-minor-mode intono-mode
