@@ -106,6 +106,9 @@ the empty string: `\"\"'."
   :group 'intono
   :package-version '(intono . "0.2"))
 
+(defvar intono--overlay nil
+  "Overlay for highlighting inline todo notes during interactive deletion.")
+
 (defun intono--regexp ()
   "Return a regular expression that matches any inline todo note."
   (concat (regexp-quote intono-delimiter-start)
@@ -122,8 +125,21 @@ the empty string: `\"\"'."
           intono-delimiter-end)
   (backward-char (length intono-delimiter-end)))
 
-;; TODO: Enable confirmation of deleting each inline todo note like
-;; `query-replace'?
+;; `intono--highlight' modelled on `isearch-highlight' and
+;; `replace-highlight'.
+(defun intono--highlight (beg end)
+  "Highlight the region from BEG to END with an `intono--overlay'.
+If an overlay already exists, move its position, otherwise create it."
+  (if intono--overlay
+      (move-overlay intono--overlay beg end)
+    (setq intono--overlay (make-overlay beg end))
+    (overlay-put intono--overlay 'face 'query-replace)))
+
+;; TODO: Create intono-delete-all-in-buffer-map with y, n, and ! for
+;; all (also @ for delete all and `diff-buffer-with-file'
+;; afterwards?).
+;; TODO: Use `read-from-minibuffer' with intono specific map instead
+;; of yes-or-no-p
 ;;;###autoload
 (defun intono-delete-all-in-buffer ()
   "Delete all inline todo notes in buffer.
@@ -145,7 +161,17 @@ before running it."
     (save-excursion
       (goto-char (point-min))
       (while (re-search-forward inline-todo-note nil t)
-        (delete-region (match-beginning 0) (match-end 0))))))
+        (let ((beg (match-beginning 0))
+              (end (match-end 0)))
+          (intono--highlight beg end)
+          ;; FIXME: Overlay is never cleaned up if `yes-or-no-p' is
+          ;; quit with C-g. Look at how isearch/query-replace handles
+          ;; this.
+          (when (yes-or-no-p "Delete inline todo note at point? ")
+            (delete-region beg end))))
+      ;; Clean up overlay when finished.
+      (when intono--overlay
+        (delete-overlay intono--overlay)))))
 
 ;;;###autoload
 (define-minor-mode intono-mode
