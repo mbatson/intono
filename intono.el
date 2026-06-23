@@ -49,8 +49,8 @@
 ;; Note the absence of any additional whitespace to the text outside
 ;; the inline todo note. Using inline todo notes in this manner means
 ;; that if they are stripped from a file (like with
-;; `intono-delete-all-in-buffer',for example), their removal will not
-;; leave redundant whitespace behind in the text.
+;; `intono-delete-all',for example), their removal will not leave
+;; redundant whitespace behind in the text.
 ;;
 ;; The point of this style of todo note is to enable the user to
 ;; record notes or reminders relating to the immediate context of what
@@ -140,11 +140,10 @@ If an overlay already exists, move its position, otherwise create it."
   (when intono--overlay
     (delete-overlay intono--overlay)))
 
-;; TODO: Refactor to intono-delete-all
 ;; TODO: Create variant that runs intono-delete-all and then shows a
 ;; diff of changes made.
 ;;;###autoload
-(defun intono-delete-all-in-buffer ()
+(defun intono-delete-all ()
   "Interactively delete inline todo notes in current buffer.
 
 This is particularly useful for preparing text full of inline todo notes
