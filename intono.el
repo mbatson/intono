@@ -4,7 +4,7 @@
 
 ;; Author: Matthew Batson <mbatson@mbatson.net>
 ;; Created: 2026
-;; Version: 0.2
+;; Version: 1.0
 ;; Package-Requires: ((emacs "29.1"))
 ;; Keywords: text
 
@@ -68,9 +68,6 @@
 
 ;;; Code:
 
-;; TODO: Create command for hiding and showing notes (completely hide
-;; or reduce to a marker symbol?)
-
 (defgroup intono nil
   "In(line) to(do) no(tes)."
   :group 'text
@@ -106,8 +103,55 @@ the empty string: `\"\"'."
   :group 'intono
   :package-version '(intono . "0.2"))
 
-(defvar intono--overlay nil
+(defcustom intono-hiding-marker ""
+  "String that is displayed in place of inline todo notes when hidden."
+  :type 'string
+  :group 'intono
+  :package-version '(intono . "1.0"))
+
+(defvar intono--deleting-overlay nil
   "Overlay for highlighting inline todo notes during interactive deletion.")
+
+(defvar-local intono--hiding-overlays nil
+  "Overlay for hiding inline todo notes.")
+
+(defun intono--clean-up-hiding-overlays ()
+  "Delete any existing overlays in `intono--hiding-overlays'.
+
+In effect, this reveals all hidden inline todo notes in the current
+buffer.
+
+For internal use only. For the user command to reveal hidden notes, see
+`intono-toggle-note-hiding'."
+  (when intono--hiding-overlays
+    (mapc 'delete-overlay intono--hiding-overlays)
+    (setq intono--hiding-overlays nil)))
+
+;;;###autoload
+(defun intono-toggle-note-hiding ()
+  "Toggle between hiding and showing all inline todo notes in the buffer.
+
+If `intono-hiding-marker' is a non-empty string, it will be displayed in
+place of each hidden inline todo note as a marker.
+
+This command does not alter the buffer's text in any way. The hiding of
+inline todo notes, and their replacement by `intono-hiding-marker' is a
+purely visual change."
+  (interactive)
+  (if intono--hiding-overlays
+      (progn
+        (intono--clean-up-hiding-overlays)
+        (remove-hook 'before-revert-hook #'intono--clean-up-hiding-overlays t))
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward (intono--regexp) nil t)
+        (let ((overlay (make-overlay (match-beginning 0) (match-end 0) nil t nil)))
+          (overlay-put overlay 'invisible t)
+          (overlay-put overlay 'evaporate t)
+          (when (> (length intono-hiding-marker) 0)
+            (overlay-put overlay 'before-string intono-hiding-marker))
+          (push overlay intono--hiding-overlays)))
+      (add-hook 'before-revert-hook #'intono--clean-up-hiding-overlays nil t))))
 
 (defun intono--regexp ()
   "Return a regular expression that matches any inline todo note."
@@ -128,17 +172,17 @@ the empty string: `\"\"'."
 ;; `intono--highlight' modelled on `isearch-highlight' and
 ;; `replace-highlight'.
 (defun intono--highlight (beg end)
-  "Highlight the region from BEG to END with an `intono--overlay'.
+  "Highlight the region from BEG to END with an `intono--deleting-overlay'.
 If an overlay already exists, move its position, otherwise create it."
-  (if intono--overlay
-      (move-overlay intono--overlay beg end)
-    (setq intono--overlay (make-overlay beg end))
-    (overlay-put intono--overlay 'face 'query-replace)))
+  (if intono--deleting-overlay
+      (move-overlay intono--deleting-overlay beg end)
+    (setq intono--deleting-overlay (make-overlay beg end))
+    (overlay-put intono--deleting-overlay 'face 'query-replace)))
 
 (defun intono--clean-up-overlay ()
-  "Delete any existing `intono--overlay'."
-  (when intono--overlay
-    (delete-overlay intono--overlay)))
+  "Delete any existing `intono--deleting-overlay'."
+  (when intono--deleting-overlay
+    (delete-overlay intono--deleting-overlay)))
 
 ;;;###autoload
 (defun intono-delete-all ()
