@@ -140,8 +140,6 @@ If an overlay already exists, move its position, otherwise create it."
   (when intono--overlay
     (delete-overlay intono--overlay)))
 
-;; TODO: Create variant that runs intono-delete-all and then shows a
-;; diff of changes made.
 ;;;###autoload
 (defun intono-delete-all ()
   "Interactively delete inline todo notes in current buffer.
@@ -178,6 +176,17 @@ backup of the text in the buffer before running it."
         ;; Clean up overlay if user quits, like with C-g.
         (quit (intono--clean-up-overlay)))
       (intono--clean-up-overlay))))
+
+;;;###autoload
+(defun intono-delete-all-and-diff ()
+  "Execute `intono-delete-all', then show a diff of changes made to buffer.
+
+This command provides an alternative to `intono-delete-all', for users
+who always want to review a diff of changes made to the buffer by that
+command."
+  (interactive)
+  (call-interactively #'intono-delete-all)
+  (diff-buffer-with-file (current-buffer)))
 
 ;;;###autoload
 (define-minor-mode intono-mode
