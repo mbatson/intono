@@ -29,6 +29,8 @@ How one works while writing is, however, highly personal. This package was devel
 
 # TODO: Give installation instructions for package-vc installation.
 
+* TODO COMMENT Create quick-start use-package declaration
+
 * Getting Started
 
 ** Inserting inline todo notes
