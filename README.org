@@ -146,3 +146,4 @@ If you want something a bit more visual, and your font supports them, an emoji c
 
 You can insert these into the value of ~intono-hiding-marker~ with Emacs’s built-in ~insert-char~ command.
 
+* TODO COMMENT Why create this instead of using org/markdown comments or org-inlinetasks?
