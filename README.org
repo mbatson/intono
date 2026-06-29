@@ -74,6 +74,10 @@ Alternatively, enable ~global-intono-mode~ and (if needed) customise the setting
 
 ~global-intono-modes~ is set to ~text-mode~ by default.
 
+** Hiding inline todo notes in the buffer
+
+You can temporarily hide any inline todo notes in the buffer from view with the command ~intono-toggle-note-hiding~. This is purely a visual change and does not alter the buffer’s text. Use the same command again to reveal the hidden inline todo notes.
+
 * Configuration
 
 ** Customising the syntax of inline todo notes
@@ -123,3 +127,22 @@ If you do not want a keyword at all (i.e., you only want delimiter symbols as sy
 #+begin_src emacs-lisp
   (setopt intono-keyword "")
 #+end_src
+
+** Showing a symbol or string in place of inline todo notes when hidden
+
+You can optionally tell Intono to display a single character, or even a series of characters, in the location of any hidden inline todo notes. This allows you to set a marker symbol, so you can hide inline todo notes to reduce visual clutter, but still be able to see where in the text you already have notes. (Like the hiding of inline todo notes, this marker is a purely visual element. It does not actually get inserted into the buffer or the file the buffer is visiting.)
+
+This is controlled through the option ~intono-hiding-marker~. For example, to show a diamond symbol in place of hidden notes:
+
+#+begin_src emacs-lisp
+  (setopt intono-hiding-marker "⋄")
+#+end_src
+
+If you want something a bit more visual, and your font supports them, an emoji can make a great marker for hidden notes. Some possibilities include, but are not limited to:
+
+- 🗈 (NOTE [U+1F5C8])
+- 📝 (MEMO [U+1F4DD])
+- 📓 (NOTEBOOK [U+1F4D3])
+
+You can insert these into the value of ~intono-hiding-marker~ with Emacs’s built-in ~insert-char~ command.
+
