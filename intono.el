@@ -115,6 +115,13 @@ the empty string: `\"\"'."
 (defvar-local intono--hiding-overlays nil
   "Overlay for hiding inline todo notes.")
 
+(defun intono--regexp ()
+  "Return a regular expression that matches any inline todo note."
+  (concat (regexp-quote intono-delimiter-start)
+          (regexp-quote intono-keyword)
+          ".*?"
+          (regexp-quote intono-delimiter-end)))
+
 (defun intono--clean-up-hiding-overlays ()
   "Delete any existing overlays in `intono--hiding-overlays'.
 
@@ -152,13 +159,6 @@ purely visual change."
             (overlay-put overlay 'before-string intono-hiding-marker))
           (push overlay intono--hiding-overlays)))
       (add-hook 'before-revert-hook #'intono--clean-up-hiding-overlays nil t))))
-
-(defun intono--regexp ()
-  "Return a regular expression that matches any inline todo note."
-  (concat (regexp-quote intono-delimiter-start)
-          (regexp-quote intono-keyword)
-          ".*?"
-          (regexp-quote intono-delimiter-end)))
 
 ;;;###autoload
 (defun intono-insert ()
