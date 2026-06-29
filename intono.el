@@ -179,7 +179,7 @@ If an overlay already exists, move its position, otherwise create it."
     (setq intono--deleting-overlay (make-overlay beg end))
     (overlay-put intono--deleting-overlay 'face 'query-replace)))
 
-(defun intono--clean-up-overlay ()
+(defun intono--clean-up-deleting-overlay ()
   "Delete any existing `intono--deleting-overlay'."
   (when intono--deleting-overlay
     (delete-overlay intono--deleting-overlay)))
@@ -218,8 +218,8 @@ backup of the text in the buffer before running it."
                         nil
                         t)
         ;; Clean up overlay if user quits, like with C-g.
-        (quit (intono--clean-up-overlay)))
-      (intono--clean-up-overlay))))
+        (quit (intono--clean-up-deleting-overlay)))
+      (intono--clean-up-deleting-overlay))))
 
 ;;;###autoload
 (defun intono-delete-all-and-diff ()
